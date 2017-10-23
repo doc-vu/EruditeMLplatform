@@ -3,28 +3,42 @@
 var config = require('./config.webgme'),
     validateConfig = require('webgme/config/validator');
 
+
 // Add/overwrite any additional settings here
-config.server.port = 7070;
+// config.server.port = 8080;
 // config.mongo.uri = 'mongodb://127.0.0.1:27017/webgme_my_app';
-config.authentication.allowUserRegistration = true
+
+// User Registration
 config.authentication.enable = true
 config.authentication.allowGuests = true
-
-// Plugins
-config.plugin.allowServerExecution = true;
-config.plugin.allowBrowserExecution = true;
+config.authentication.allowUserRegistration = true
+config.authentication.guestAccount = 'guest'
 
 // Seeds
 config.seedProjects.enable = true;
 config.seedProjects.defaultProject = 'Erudite';
 config.seedProjects.basePaths.push("./src/seeds");
 
+// Add/overwrite any additional settings here
+config.server.port = 7777;
+
+// Plugins
+config.plugin.allowServerExecution = true;
+// Custom constraints
+config.core.enableCustomConstraints = true;
+// WebHooks
+config.webhooks.enable = true;
+
+
+
 // UI
 //config.visualization.layout.default = 'SidebarLayout';
 config.executor.enable = true;
-config.executor.enable = true;
 config.executor.clearOldDataAtStartUp = true;
-config.visualization.svgDirs = ['./icons/png'];
+config.visualization.svgDirs = ["./svgicons"];
+
+// RequireJS paths
+//config.requirejsPaths.erudite = "./src/common/"
 
 config.visualization.decoratorPaths.push('./src/decorators');
 
