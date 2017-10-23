@@ -28,7 +28,6 @@
     "ace-builds": "^1.2.9",
     "ace-code-editor": "^1.2.3",
     "async": "^2.5.0",
-    "bower": "^1.8.2",
     "codemirror": "^5.31.0",
     "deasync": "^0.1.10",
     "express-http-proxy": "^1.0.7",
