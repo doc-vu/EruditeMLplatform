@@ -27,7 +27,7 @@ config.plugin.allowServerExecution = true;
 // Custom constraints
 config.core.enableCustomConstraints = true;
 // WebHooks
-config.webhooks.enable = true;
+//config.webhooks.enable = true;
 
 
 
@@ -35,7 +35,7 @@ config.webhooks.enable = true;
 //config.visualization.layout.default = 'SidebarLayout';
 config.executor.enable = true;
 config.executor.clearOldDataAtStartUp = true;
-config.visualization.svgDirs = ["./svgicons"];
+config.visualization.svgDirs = ['./svgicons'];
 
 // RequireJS paths
 //config.requirejsPaths.erudite = "./src/common/"

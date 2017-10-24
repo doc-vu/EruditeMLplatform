@@ -62,16 +62,17 @@ define([
     codeGenerator.prototype.main = function (callback) {
         // Use self to access core, project, result, logger etc from PluginBase.
         // These are all instantiated at this point.
-        var nodeObject,
+        var self = this,
+            nodeObject,
             codeTemplate;
-        this.extractDataModel();
+        self.extractDataModel();
 
     };
 
 
     codeGenerator.prototype.extractDataModel = (function (callback) {
         var self = this;
-
+        var visited1 = false;
         // // In order to avoid multiple iterative asynchronous 'load' calls we pre-load all the nodes in the state-machine
         // // and builds up a local hash-map from their paths to the node.
         return this.core.loadSubTree(self.activeNode)
@@ -83,19 +84,25 @@ define([
 
                 for (var i = 0; i < nodes.length; i += 1) {
                     self.pathToNode[self.core.getPath(nodes[i])] = nodes[i];
-                    //self.logger.info(self.core.getAttribute(nodes[i], 'name'));
+                    // self.logger.info(self.core.getAttribute(nodes[i], 'name'));
                 }
 
                 childrenPaths = self.core.getChildrenPaths(self.activeNode);
 
-                var editors = [];
-                var items = 0;
+                var editors_input = [];
+                var editors_dp = [];
+                var editors_ml = [];
+                var editors_eval = [];
+                var ip_items = 0;
+                var dp_items = 0;
+                var ml_items = 0;
+                var eval_items = 0;
                 for (var i = 0; i < childrenPaths.length; i += 1) {
                     childNode = self.pathToNode[childrenPaths[i]];
                     // Log the name of the child (it's an attribute so we use getAttribute).
                     childName = self.core.getAttribute(childNode, 'name');
 
-                    // self.logger.info('At childNode', childName);
+                    self.logger.info('At childNode', childName);
                     // if (self.isMetaTypeOf(childNode, self.META['Input']) === true) {
                     //     childName = self.core.getAttribute(childNode, 'path');
                     //     self.logger.info('At childNode', childName);
@@ -109,50 +116,84 @@ define([
                             self.logger.info(self.core.getAttribute(self.pathToNode[inNode[j]], 'name'));
                             self.logger.info(self.core.getAttribute(self.pathToNode[inNode[j]], 'codeEditor'));
                             var _func = self.core.getAttribute(self.pathToNode[inNode[j]], 'codeEditor');
-                            editors[items] = _func.toString();
+                            editors_input[ip_items] = _func;
                             // self.logger.error('Arrayitem', items);
-                            items++;
+                            ip_items++;
 
                         }
                     }
 
-                    else if (self.isMetaTypeOf(childNode, self.META['DataPreprocessing']) === true) {
+                    if (self.isMetaTypeOf(childNode, self.META['DataPreprocessing']) === true) {
                         var acqNode = self.core.getChildrenPaths(childNode);
                         for (var j = 0; j < acqNode.length; j += 1) {
-                            if ((self.core.getAttribute(self.pathToNode[acqNode[j]], self.META['ETLConn'])) === true) {
-                                // Should be ordered
-                                childName = self.core.getAttribute(acqNode[j], 'name');
-                                self.logger.info('At childNode', childName);
-                                var src_Path = self.core.getPointerPath(acqNode[j], 'src');
-                                var dst_Path = self.core.getPointerPath(acqNode[j], 'dst');
-                            }
-                            else {
-                                self.logger.info(self.core.getAttribute(self.pathToNode[acqNode[j]], 'name'));
-                                self.logger.info(self.core.getAttribute(self.pathToNode[acqNode[j]], 'codeEditor'));
-                                var _func = self.core.getAttribute(self.pathToNode[acqNode[j]], 'codeEditor');
-                                editors[items] = _func.toString();
-                                // self.logger.error('Arrayitem', items);
-                                items++;
-                            }
+                            // if ((self.core.getAttribute(self.pathToNode[acqNode[j]], self.META['ETLConn'])) === true) {
+                            //     // Should be ordered
+                            //     childName = self.core.getAttribute(acqNode[j], 'name');
+                            //     self.logger.info('At childNode', childName);
+                            //     var src_Path = self.core.getPointerPath(acqNode[j], 'src');
+                            //     var dst_Path = self.core.getPointerPath(acqNode[j], 'dst');
+                            // }
+                            // else {
+                            self.logger.info(self.core.getAttribute(self.pathToNode[acqNode[j]], 'name'));
+                            self.logger.info(self.core.getAttribute(self.pathToNode[acqNode[j]], 'codeEditor'));
+                            var _func1 = self.core.getAttribute(self.pathToNode[acqNode[j]], 'codeEditor');
+                            editors_dp[dp_items] = _func1;
+                            self.logger.error('Arrayitem', dp_items);
+                            dp_items++;
+                            // }
                         }
                     }
 
-                    else if (self.isMetaTypeOf(childNode, self.META['MLFramework']) === true) {
+                    if (self.isMetaTypeOf(childNode, self.META['MLAlgorithms']) === true) {
                         var mlNode = self.core.getChildrenPaths(childNode);
                         for (var j = 0; j < mlNode.length; j += 1) {
                             self.logger.info(self.core.getAttribute(self.pathToNode[mlNode[j]], 'name'));
                             self.logger.info(self.core.getAttribute(self.pathToNode[mlNode[j]], 'codeEditor'));
                             var _func = self.core.getAttribute(self.pathToNode[mlNode[j]], 'codeEditor');
-                            editors[items] = _func.toString();
+                            editors_ml[ml_items] = _func;
                             // self.logger.error('Arrayitem', items);
-                            items++;
+                            ml_items++;
                         }
                     }
 
+                    if (self.isMetaTypeOf(childNode, self.META['EvaluateModel']) === true) {
+                        var evalNode = self.core.getChildrenPaths(childNode);
+                        for (var j = 0; j < evalNode.length; j += 1) {
+                            self.logger.info(self.core.getAttribute(self.pathToNode[evalNode[j]], 'name'));
+                            self.logger.info(self.core.getAttribute(self.pathToNode[evalNode[j]], 'codeEditor'));
+                            var _func = self.core.getAttribute(self.pathToNode[evalNode[j]], 'codeEditor');
+                            editors_eval[eval_items] = _func;
+                            // self.logger.error('Arrayitem', items);
+                            eval_items++;
+                        }
+                    }
                 }
 
-                editors.forEach(function (item, index, array) {
-                    self.logger.error('Array', item);
+
+                // editors_input = [];
+                // editors_dp = [];
+                // editors_ml = [];
+                // editors_eval = [];
+                var editors = []
+                editors_input.forEach(function (item1, index, array) {
+                    self.logger.error('editors_input', item1);
+                    editors.push(item1);
+                });
+                editors_dp.forEach(function (item2, index, array) {
+                    self.logger.error('editors_dp', item2);
+                    editors.push(item2);
+                });
+                editors_ml.forEach(function (item3, index, array) {
+                    //self.logger.error('Array', item);
+                    editors.push(item3);
+                });
+                editors_eval.forEach(function (item4, index, array) {
+                    //self.logger.error('Array', item);
+                    editors.push(item4);
+                });
+                editors[1] = "";
+                editors.forEach(function (itemall, index, array) {
+                    console.log('Array', index, itemall);
                 });
 
                 var fs = require('fs');
@@ -160,33 +201,34 @@ define([
 
                 fs.exists('./src/plugins/codeGenerator/templates/temp.ejs', function (exists) {
                     if (exists) {
-                        //Show in green
-                        // console.log('File exists. Deleting now ...');
-                        // fs.unlink('./src/plugins/codeGenerator/templates/temp.ejs');
-                        for (var iter = 0; iter < items; iter++) {
-                            console.log(iter);
-                            //Read the template file
+                        //         //Show in green
+                        //         // console.log('File exists. Deleting now ...');
+                        //         // fs.unlink('./src/plugins/codeGenerator/templates/temp.ejs');
+                        for (var iter = 0; iter < editors.length; iter++) {
+                            // console.log(iter);
+                            //             //Read the template file
                             var template = fs.readFileSync('./src/plugins/codeGenerator/templates/jupyter.ejs', 'utf8');
-                            console.log(template);
-                            // var template = fs.readFile('./src/plugins/codeGenerator/templates/jupyter.ejs', 'utf8',  function read(err, data) {
-                            //      if (err) {
-                            //          throw err;
-                            //      }
+                            //console.log(template);
+                            //             // var template = fs.readFile('./src/plugins/codeGenerator/templates/jupyter.ejs', 'utf8',  function read(err, data) {
+                            //             //      if (err) {
+                            //             //          throw err;
+                            //             //      }
                             var tempcontent = template;
-
-                            // Length of editor
-                            console.log(editors.length);
-                            // Invoke the next step here however you like
-                            console.log(tempcontent);   // Put all of the code here (not the best solution)
+                            //
+                            //             // Length of editor
+                            // console.log(editors.length);
+                            //             // Invoke the next step here however you like
+                            //console.log(tempcontent);   // Put all of the code here (not the best solution)
                             tempcontent = tempcontent.replace(/<<numbers>>/g, iter + 1);
                             // console.log(tempcontent);
-                            console.log(iter);
-                            self.logger.error(editors[iter]);
+                            //console.log(iter);
+                            // self.logger.error(editors[iter]);
                             var temed = editors[iter];
                             temed = JSON.stringify(temed);
-                            self.logger.error(temed);
+
+                            // self.logger.error(temed);
                             tempcontent = tempcontent.replace(/<<source>>/g, temed);
-                            console.log(tempcontent);
+                            // console.log(tempcontent);
 
                             if (iter == 0) {
                                 fs.writeFile("./src/plugins/codeGenerator/templates/temp.ejs", tempcontent, function (err) {
@@ -205,75 +247,80 @@ define([
                                     }
 
                                     console.log("The file was saved!");
-                                    //generateFile();
+                                    generateFile();
                                 });
                             }
-                            // });
-                        }
-                    } else {
-                        //Show in red
-                        self.logger.error('File not found, so not deleting.');
-                        // fs.writeFile("./src/plugins/codeGenerator/templates/temp.ejs", tempcontent, function (err) {
-                        //     if (err) {
-                        //         return console.log(err);
-                        //     }
-                        //
-                        //     console.log("The file was saved!");
-                        //     //generateFile();
-                        // });
-                        for (var iter = 0; iter < items; iter++) {
-                            console.log(iter);
-                            //Read the template file
-                            var template = fs.readFile('./src/plugins/codeGenerator/templates/jupyter.ejs', 'utf8', function read(err, data) {
-                                if (err) {
-                                    throw err;
-                                }
-                                var tempcontent = data;
-
-                                // Length of editor
-                                console.log(editors.length);
-                                // Invoke the next step here however you like
-                                // console.log(tempcontent);   // Put all of the code here (not the best solution)
-                                tempcontent = tempcontent.replace(/<<numbers>>/g, iter + 1);
-                                // console.log(tempcontent);
-                                self.logger.error(editors[iter]);
-                                var temed = editors[iter];
-                                temed = JSON.stringify(temed);
-                                self.logger.error(temed);
-                                tempcontent = tempcontent.replace(/<<source>>/g, temed);
-                                // console.log(tempcontent);
-
-                                if (iter == 0) {
-                                    fs.writeFileSync("./src/plugins/codeGenerator/templates/temp.ejs", tempcontent);
-                                    generateFile();
-                                    // fs.writeFile("./src/plugins/codeGenerator/templates/temp.ejs", tempcontent, function (err) {
-                                    //     if (err) {
-                                    //         return console.log(err);
-                                    //     }
-                                    //
-                                    //     console.log("The file was saved!");
-                                    //     generateFile();
-                                    // });
-                                }
-                                else {
-                                    fs.appendFileSync("./src/plugins/codeGenerator/templates/temp.ejs", tempcontent);
-                                    generateFile();
-                                    // fs.appendFile("./src/plugins/codeGenerator/templates/temp.ejs", tempcontent, function (err) {
-                                    //     if (err) {
-                                    //         return console.log(err);
-                                    //     }
-                                    //
-                                    //     console.log("The file was saved!");
-                                    //     generateFile();
-                                    // });
-                                }
-                            });
                         }
                     }
+                    // });
+                    // }
+                    //     }
+                    else {
+                        //         //Show in red
+                        self.logger.error('File not found, so not deleting.');
+                        //         // fs.writeFile("./src/plugins/codeGenerator/templates/temp.ejs", tempcontent, function (err) {
+                        //         //     if (err) {
+                        //         //         return console.log(err);
+                        //         //     }
+                        //         //
+                        //         //     console.log("The file was saved!");
+                        //         //     //generateFile();
+                        //         // });
+                        for (var iter = 0; iter < editors.length; iter++) {
+                            // console.log(iter);
+                            //Read the template file
+                            var template = fs.readFileSync('./src/plugins/codeGenerator/templates/jupyter.ejs', 'utf8');
+                            // console.log(template);
+                            // var template = fs.readFileSync('./src/plugins/codeGenerator/templates/jupyter.ejs', 'utf8', function read(err, data) {
+                            //     if (err) {
+                            //         throw err;
+                            //     }
+                            var tempcontent = template;
+                            //
+                            //     //                 // Length of editor
+                            // console.log(editors.length);
+                            // Invoke the next step here however you like
+                            // console.log(tempcontent);   // Put all of the code here (not the best solution)
+                            tempcontent = tempcontent.replace(/<<numbers>>/g, iter + 1);
+                            //                 // console.log(tempcontent);
+                            // self.logger.error(editors[iter]);
+                            var temed = editors[iter];
+                            temed = JSON.stringify(temed);
+                            // self.logger.error(temed);
+                            tempcontent = tempcontent.replace(/<<source>>/g, temed);
+                            // console.log(tempcontent);
+
+                            if (iter == 0) {
+                                fs.writeFileSync("./src/plugins/codeGenerator/templates/temp.ejs", tempcontent);
+                                generateFile();
+                                // fs.writeFile("./src/plugins/codeGenerator/templates/temp.ejs", tempcontent, function (err) {
+                                //     if (err) {
+                                //         return console.log(err);
+                                //     }
+                                //
+                                //     console.log("The file was saved!");
+                                //     generateFile();
+                                // });
+                            }
+                            else {
+                                fs.appendFileSync("./src/plugins/codeGenerator/templates/temp.ejs", tempcontent);
+                                generateFile();
+                                // fs.appendFile("./src/plugins/codeGenerator/templates/temp.ejs", tempcontent, function (err) {
+                                //     if (err) {
+                                //         return console.log(err);
+                                //     }
+                                //
+                                //     console.log("The file was saved!");
+                                //     generateFile();
+                                // });
+                            }
+                            //             });
+                            // }
+                        }
+                    }
+                    //
+                    //
                 });
-
-
-                // });
 
 
                 return editors;
@@ -291,7 +338,7 @@ define([
             if (exists) {
                 //Show in green
                 // console.log('File exists. Deleting now ...');
-               // fs.unlink('./src/plugins/codeGenerator/abc.ipynb');
+                // fs.unlink('./src/plugins/codeGenerator/abc.ipynb');
             } else {
                 //Show in red
                 console.log('File not found, so not deleting.');
@@ -329,7 +376,7 @@ define([
         var templatecontent = template;
 
         // Invoke the next step here however you like
-        console.log(templatecontent);   // Put all of the code here (not the best solution)
+        // console.log(templatecontent);   // Put all of the code here (not the best solution)
         fs.appendFileSync("src/plugins/codeGenerator/abc.ipynb", templatecontent);
         // fs.appendFile("src/plugins/codeGenerator/abc.ipynb", templatecontent, function (err) {
         //     if (err) {
@@ -359,95 +406,95 @@ define([
         //     console.log("The file was finalized!");
         // });
         //});
-        fs.exists('./src/plugins/codeGenerator/abc.ipynb', function (exists) {
-            if (exists) {
-                uploadFile();
-            }
-        });
+        // fs.exists('./src/plugins/codeGenerator/abc.ipynb', function (exists) {
+        //     if (exists) {
+        //         uploadFile();
+        //     }
+        // });
 
     });
 
-    var uploadFile = function (callback) {
-        var fs = require('fs');
-        var ssh2 = require('ssh2');
-
-        var conn = new ssh2();
-
-        conn.on(
-            'connect',
-            function () {
-                console.log("- connected");
-            }
-        );
-
-        conn.on(
-            'ready',
-            function () {
-                console.log("- ready");
-
-                conn.sftp(
-                    function (err, sftp) {
-                        if (err) {
-                            console.log("Error, problem starting SFTP: %s", err);
-                            process.exit(2);
-                        }
-
-                        console.log("- SFTP started");
-
-                        // Delete if existed
-                        sftp.unlink("/home/ubuntu//dataAnalytics/notebooks/webGME_iPython.ipynb", function (err) {
-                            if (err) {
-                                console.log("Error, problem starting SFTP: %s", err);
-                            }
-                            else {
-                                console.log("file unlinked");
-                            }
-                        });
-                        // upload file
-                        var readStream = fs.createReadStream("./src/plugins/codeGenerator/abc.ipynb");
-                        var writeStream = sftp.createWriteStream("/home/ubuntu//dataAnalytics/notebooks/webGME_iPython.ipynb");
-
-                        // what to do when transfer finishes
-                        writeStream.on(
-                            'close',
-                            function () {
-                                console.log("- file transferred");
-                                sftp.end();
-                                process.exit(0);
-                            }
-                        );
-
-                        // initiate transfer of file
-                        readStream.pipe(writeStream);
-                    }
-                );
-            }
-        );
-
-        conn.on(
-            'error',
-            function (err) {
-                console.log("- connection error: %s", err);
-                process.exit(1);
-            }
-        );
-
-        conn.on(
-            'end',
-            function () {
-                process.exit(0);
-            }
-        );
-
-        conn.connect(
-            {
-                "host": "129.59.107.59",
-                "port": 22,
-                "username": "ubuntu",
-                "privateKey": fs.readFileSync('/root/.ssh/id_rsa')
-            }
-        );
-    };
+    // var uploadFile = function (callback) {
+    //     var fs = require('fs');
+    //     var ssh2 = require('ssh2');
+    //
+    //     var conn = new ssh2();
+    //
+    //     conn.on(
+    //         'connect',
+    //         function () {
+    //             console.log("- connected");
+    //         }
+    //     );
+    //
+    //     conn.on(
+    //         'ready',
+    //         function () {
+    //             console.log("- ready");
+    //
+    //             conn.sftp(
+    //                 function (err, sftp) {
+    //                     if (err) {
+    //                         console.log("Error, problem starting SFTP: %s", err);
+    //                         process.exit(2);
+    //                     }
+    //
+    //                     console.log("- SFTP started");
+    //
+    //                     // Delete if existed
+    //                     sftp.unlink("/home/ubuntu//dataAnalytics/notebooks/webGME_iPython.ipynb", function (err) {
+    //                         if (err) {
+    //                             console.log("Error, problem starting SFTP: %s", err);
+    //                         }
+    //                         else {
+    //                             console.log("file unlinked");
+    //                         }
+    //                     });
+    //                     // upload file
+    //                     var readStream = fs.createReadStream("./src/plugins/codeGenerator/abc.ipynb");
+    //                     var writeStream = sftp.createWriteStream("/home/ubuntu//dataAnalytics/notebooks/webGME_iPython.ipynb");
+    //
+    //                     // what to do when transfer finishes
+    //                     writeStream.on(
+    //                         'close',
+    //                         function () {
+    //                             console.log("- file transferred");
+    //                             sftp.end();
+    //                             process.exit(0);
+    //                         }
+    //                     );
+    //
+    //                     // initiate transfer of file
+    //                     readStream.pipe(writeStream);
+    //                 }
+    //             );
+    //         }
+    //     );
+    //
+    //     conn.on(
+    //         'error',
+    //         function (err) {
+    //             console.log("- connection error: %s", err);
+    //             process.exit(1);
+    //         }
+    //     );
+    //
+    //     conn.on(
+    //         'end',
+    //         function () {
+    //             process.exit(0);
+    //         }
+    //     );
+    //
+    //     conn.connect(
+    //         {
+    //             "host": "129.59.107.59",
+    //             "port": 22,
+    //             "username": "ubuntu",
+    //             "privateKey": fs.readFileSync('/root/.ssh/id_rsa')
+    //         }
+    //     );
+    // };
 
 
     return codeGenerator;

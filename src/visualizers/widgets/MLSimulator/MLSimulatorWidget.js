@@ -58,7 +58,7 @@ define(['css!./styles/MLSimulatorWidget.css'], function () {
 
     MLSimulatorWidget.prototype.getNotebookUrl = function (desc) {
         // Replace "localhost:9999" with "moca.isis.vanderbilt.edu" if you're running this on localhost
-        return "http://129.59.107.59:9999/notebooks/dataAnalytics/notebooks/webGME_iPython.ipynb";
+        return "http://localhost:8888/notebooks/dataAnalytics/notebooks/abc.ipynb";
         //return "ipython/notebooks/" + WebGMEGlobal.userInfo._id + "/"
         //    + desc.projectName + "/"
         //    + desc.name + ".ipynb";
