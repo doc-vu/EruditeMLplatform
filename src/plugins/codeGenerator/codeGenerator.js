@@ -125,40 +125,103 @@ define([
 
                     if (self.isMetaTypeOf(childNode, self.META['DataPreprocessing']) === true) {
                         var acqNode = self.core.getChildrenPaths(childNode);
+                        var srcName, dstName;
                         for (var j = 0; j < acqNode.length; j += 1) {
-                            // if ((self.core.getAttribute(self.pathToNode[acqNode[j]], self.META['ETLConn'])) === true) {
-                            //     // Should be ordered
-                            //     childName = self.core.getAttribute(acqNode[j], 'name');
-                            //     self.logger.info('At childNode', childName);
-                            //     var src_Path = self.core.getPointerPath(acqNode[j], 'src');
-                            //     var dst_Path = self.core.getPointerPath(acqNode[j], 'dst');
-                            // }
-                            // else {
                             self.logger.info(self.core.getAttribute(self.pathToNode[acqNode[j]], 'name'));
-                            self.logger.info(self.core.getAttribute(self.pathToNode[acqNode[j]], 'codeEditor'));
-                            var _func1 = self.core.getAttribute(self.pathToNode[acqNode[j]], 'codeEditor');
-                            editors_dp[dp_items] = _func1;
-                            self.logger.error('Arrayitem', dp_items);
-                            dp_items++;
-                            // }
+
+                            if ((self.isMetaTypeOf(self.pathToNode[acqNode[j]], self.META['Connections'])) === true) {
+
+                                // Should be ordered
+                                var evalName = self.core.getAttribute(self.pathToNode[acqNode[j]], 'name');
+                                self.logger.info('At childNode', evalName);
+                                var src_Path = self.core.getPointerPath(self.pathToNode[acqNode[j]], 'src');
+                                var dst_Path = self.core.getPointerPath(self.pathToNode[acqNode[j]], 'dst');
+                                if (src_Path && dst_Path) {
+                                    var srcNode = self.pathToNode[src_Path];
+                                    var dstNode = self.pathToNode[dst_Path];
+                                    srcName = self.core.getAttribute(srcNode, 'name');
+                                    dstName = self.core.getAttribute(srcNode, 'name');
+                                    self.logger.info(self.core.getAttribute(srcNode, 'codeEditor'));
+                                    var _func1 = self.core.getAttribute(srcNode, 'codeEditor');
+                                    editors_dp[dp_items] = _func1;
+                                    self.logger.error('Arrayitem', dp_items);
+                                    dp_items++;
+                                    var _func2 = self.core.getAttribute(dstNode, 'codeEditor');
+                                    editors_dp[dp_items] = _func2;
+                                    self.logger.error('Arrayitem', dp_items);
+                                    dp_items++;
+                                }
+
+                            }
+                            else {
+                                var name = self.core.getAttribute(self.pathToNode[acqNode[j]], 'name');
+                                if (name != srcName || name != dstName) {
+                                    self.logger.info(self.core.getAttribute(self.pathToNode[acqNode[j]], 'codeEditor'));
+                                    var _func1 = self.core.getAttribute(self.pathToNode[acqNode[j]], 'codeEditor');
+                                    editors_dp[dp_items] = _func1;
+                                    self.logger.error('Arrayitem', dp_items);
+                                    dp_items++;
+                                }
+                            }
                         }
                     }
 
                     if (self.isMetaTypeOf(childNode, self.META['MLAlgorithms']) === true) {
                         var mlNode = self.core.getChildrenPaths(childNode);
+                        var srcNames = [];
+                        var dstNames = [];
                         for (var j = 0; j < mlNode.length; j += 1) {
                             self.logger.info(self.core.getAttribute(self.pathToNode[mlNode[j]], 'name'));
-                            self.logger.info(self.core.getAttribute(self.pathToNode[mlNode[j]], 'codeEditor'));
-                            var _func = self.core.getAttribute(self.pathToNode[mlNode[j]], 'codeEditor');
-                            editors_ml[ml_items] = _func;
-                            // self.logger.error('Arrayitem', items);
-                            ml_items++;
+                            if ((self.isMetaTypeOf(self.pathToNode[mlNode[j]], self.META['Connections'])) === true) {
+
+                                // Should be ordered
+                                var mlName = self.core.getAttribute(self.pathToNode[mlNode[j]], 'name');
+                                self.logger.info('At childNode', mlName);
+                                var src_Path = self.core.getPointerPath(self.pathToNode[mlNode[j]], 'src');
+                                var dst_Path = self.core.getPointerPath(self.pathToNode[mlNode[j]], 'dst');
+                                if (src_Path && dst_Path) {
+                                    var srcNode = self.pathToNode[src_Path];
+                                    var dstNode = self.pathToNode[dst_Path];
+                                    var srcName = self.core.getAttribute(srcNode, 'name');
+                                    var dstName = self.core.getAttribute(dstNode, 'name');
+                                    srcNames.push(srcName);
+                                    dstNames.push(dstName);
+                                    //self.logger.info(self.core.getAttribute(srcNode, 'codeEditor'));
+                                    var _func1 = self.core.getAttribute(srcNode, 'codeEditor');
+                                    editors_ml[ml_items] = _func1;
+                                    //self.logger.error('Arrayitem', ml_items);
+                                    ml_items++;
+                                    var _func2 = self.core.getAttribute(dstNode, 'codeEditor');
+                                    editors_ml[ml_items] = _func2;
+                                    //self.logger.error('Arrayitem', ml_items);
+                                    ml_items++;
+                                }
+                            }
                         }
+
+                        self.logger.info("*s***",srcNames);
+                        self.logger.info("*d***",dstNames);
+
+                        for (var j = 0; j < mlNode.length; j += 1) {
+                            var name = self.core.getAttribute(self.pathToNode[mlNode[j]], 'name');
+                            self.logger.info(name);
+                            self.logger.info("sname",srcNames.indexOf(name));
+                            self.logger.info("dname",dstNames.indexOf(name));
+                            if ((srcNames.indexOf(name) === -1) && (dstNames.indexOf(name) === -1)) {
+                                self.logger.info ("??",name);
+                                var _func = self.core.getAttribute(self.pathToNode[mlNode[j]], 'codeEditor');
+                                editors_ml[ml_items] = _func;
+                                // self.logger.error('Arrayitem', items);
+                                ml_items++;
+                            }
+                        }
+
                     }
 
                     if (self.isMetaTypeOf(childNode, self.META['EvaluateModel']) === true) {
                         var evalNode = self.core.getChildrenPaths(childNode);
                         for (var j = 0; j < evalNode.length; j += 1) {
+
                             self.logger.info(self.core.getAttribute(self.pathToNode[evalNode[j]], 'name'));
                             self.logger.info(self.core.getAttribute(self.pathToNode[evalNode[j]], 'codeEditor'));
                             var _func = self.core.getAttribute(self.pathToNode[evalNode[j]], 'codeEditor');
@@ -191,7 +254,7 @@ define([
                     //self.logger.error('Array', item);
                     editors.push(item4);
                 });
-                editors[1] = "";
+                //editors[1] = "";
                 editors.forEach(function (itemall, index, array) {
                     console.log('Array', index, itemall);
                 });
@@ -406,95 +469,103 @@ define([
         //     console.log("The file was finalized!");
         // });
         //});
-        // fs.exists('./src/plugins/codeGenerator/abc.ipynb', function (exists) {
-        //     if (exists) {
-        //         uploadFile();
-        //     }
-        // });
+        var replace = require("replace");
+        fs.exists('./src/plugins/codeGenerator/abc.ipynb', function (exists) {
+            if (exists) {
+                replace({
+                    regex: "undefined",
+                    replacement: " ",
+                    paths: ['./src/plugins/codeGenerator/abc.ipynb'],
+                    recursive: true,
+                    silent: true,
+                });
+                uploadFile();
+            }
+        });
 
     });
 
-    // var uploadFile = function (callback) {
-    //     var fs = require('fs');
-    //     var ssh2 = require('ssh2');
-    //
-    //     var conn = new ssh2();
-    //
-    //     conn.on(
-    //         'connect',
-    //         function () {
-    //             console.log("- connected");
-    //         }
-    //     );
-    //
-    //     conn.on(
-    //         'ready',
-    //         function () {
-    //             console.log("- ready");
-    //
-    //             conn.sftp(
-    //                 function (err, sftp) {
-    //                     if (err) {
-    //                         console.log("Error, problem starting SFTP: %s", err);
-    //                         process.exit(2);
-    //                     }
-    //
-    //                     console.log("- SFTP started");
-    //
-    //                     // Delete if existed
-    //                     sftp.unlink("/home/ubuntu//dataAnalytics/notebooks/webGME_iPython.ipynb", function (err) {
-    //                         if (err) {
-    //                             console.log("Error, problem starting SFTP: %s", err);
-    //                         }
-    //                         else {
-    //                             console.log("file unlinked");
-    //                         }
-    //                     });
-    //                     // upload file
-    //                     var readStream = fs.createReadStream("./src/plugins/codeGenerator/abc.ipynb");
-    //                     var writeStream = sftp.createWriteStream("/home/ubuntu//dataAnalytics/notebooks/webGME_iPython.ipynb");
-    //
-    //                     // what to do when transfer finishes
-    //                     writeStream.on(
-    //                         'close',
-    //                         function () {
-    //                             console.log("- file transferred");
-    //                             sftp.end();
-    //                             process.exit(0);
-    //                         }
-    //                     );
-    //
-    //                     // initiate transfer of file
-    //                     readStream.pipe(writeStream);
-    //                 }
-    //             );
-    //         }
-    //     );
-    //
-    //     conn.on(
-    //         'error',
-    //         function (err) {
-    //             console.log("- connection error: %s", err);
-    //             process.exit(1);
-    //         }
-    //     );
-    //
-    //     conn.on(
-    //         'end',
-    //         function () {
-    //             process.exit(0);
-    //         }
-    //     );
-    //
-    //     conn.connect(
-    //         {
-    //             "host": "129.59.107.59",
-    //             "port": 22,
-    //             "username": "ubuntu",
-    //             "privateKey": fs.readFileSync('/root/.ssh/id_rsa')
-    //         }
-    //     );
-    // };
+    var uploadFile = function (callback) {
+        var fs = require('fs');
+        var ssh2 = require('ssh2');
+
+        var conn = new ssh2();
+
+        conn.on(
+            'connect',
+            function () {
+                console.log("- connected");
+            }
+        );
+
+        conn.on(
+            'ready',
+            function () {
+                console.log("- ready");
+
+                conn.sftp(
+                    function (err, sftp) {
+                        if (err) {
+                            console.log("Error, problem starting SFTP: %s", err);
+                            process.exit(2);
+                        }
+
+                        console.log("- SFTP started");
+
+                        // Delete if existed
+                        sftp.unlink("/root/DataAnalyticsApp/webGME_iPython.ipynb", function (err) {
+                            if (err) {
+                                console.log("Error, problem starting SFTP: %s", err);
+                            }
+                            else {
+                                console.log("file unlinked");
+                            }
+                        });
+                        // upload file
+                        var readStream = fs.createReadStream("./src/plugins/codeGenerator/abc.ipynb");
+                        var writeStream = sftp.createWriteStream("/root/DataAnalyticsApp/webGME_iPython.ipynb");
+
+                        // what to do when transfer finishes
+                        writeStream.on(
+                            'close',
+                            function () {
+                                console.log("- file transferred");
+                                sftp.end();
+                                process.exit(0);
+                            }
+                        );
+
+                        // initiate transfer of file
+                        readStream.pipe(writeStream);
+                    }
+                );
+            }
+        );
+
+        conn.on(
+            'error',
+            function (err) {
+                console.log("- connection error: %s", err);
+                process.exit(1);
+            }
+        );
+
+        conn.on(
+            'end',
+            function () {
+                process.exit(0);
+            }
+        );
+
+        conn.connect(
+            {
+                "host": "129.59.234.241",
+                "port": 22,
+                "username": "root",
+                "privateKey": fs.readFileSync('/root/.ssh/id_rsa')
+            }
+        );
+    };
 
 
     return codeGenerator;
