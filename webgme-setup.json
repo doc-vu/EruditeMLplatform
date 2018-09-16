@@ -16,6 +16,10 @@
       "codeGenerator": {
         "src": "src/plugins/codeGenerator",
         "test": "test/plugins/codeGenerator"
+      },
+      "nngenerator": {
+        "src": "src/plugins/nngenerator",
+        "test": "test/plugins/nngenerator"
       }
     },
     "visualizers": {

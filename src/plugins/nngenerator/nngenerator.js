@@ -31,7 +31,7 @@ define([
      * @classdesc This class represents the plugin codeGenerator.
      * @constructor
      */
-    var codeGenerator = function () {
+    var nngenerator = function () {
         // Call base class' constructor.
         PluginBase.call(this);
         this.pluginMetadata = pluginMetadata;
@@ -44,11 +44,11 @@ define([
      * This is also available at the instance at this.pluginMetadata.
      * @type {object}
      */
-    codeGenerator.metadata = pluginMetadata;
+    nngenerator.metadata = pluginMetadata;
 
     // Prototypical inheritance from PluginBase.
-    codeGenerator.prototype = Object.create(PluginBase.prototype);
-    codeGenerator.prototype.constructor = codeGenerator;
+    nngenerator.prototype = Object.create(PluginBase.prototype);
+    nngenerator.prototype.constructor = nngenerator;
     var deasync = require("deasync")
     /**
      * Main function for the plugin to execute. This will perform the execution.
@@ -59,7 +59,7 @@ define([
      *
      * @param {function(string, plugin.PluginResult)} callback - the result callback
      */
-    codeGenerator.prototype.main = function (callback) {
+    nngenerator.prototype.main = function (callback) {
         // Use self to access core, project, result, logger etc from PluginBase.
         // These are all instantiated at this point.
         var self = this,
@@ -70,7 +70,7 @@ define([
     };
 
 
-    codeGenerator.prototype.extractDataModel = (function (callback) {
+    nngenerator.prototype.extractDataModel = (function (callback) {
         var self = this;
         var visited1 = false;
         // // In order to avoid multiple iterative asynchronous 'load' calls we pre-load all the nodes in the state-machine
@@ -97,6 +97,7 @@ define([
                 var dp_items = 0;
                 var ml_items = 0;
                 var eval_items = 0;
+                var viz_items = 0;
                 for (var i = 0; i < childrenPaths.length; i += 1) {
                     childNode = self.pathToNode[childrenPaths[i]];
                     // Log the name of the child (it's an attribute so we use getAttribute).
@@ -226,6 +227,19 @@ define([
                             self.logger.info(self.core.getAttribute(self.pathToNode[evalNode[j]], 'codeEditor'));
                             var _func = self.core.getAttribute(self.pathToNode[evalNode[j]], 'codeEditor');
                             editors_eval[eval_items] = _func;
+                            // self.logger.error('Arrayitem', items);
+                            eval_items++;
+                        }
+                    }
+
+                    if (self.isMetaTypeOf(childNode, self.META['Visualize']) === true) {
+                        var evalNode = self.core.getChildrenPaths(childNode);
+                        for (var j = 0; j < evalNode.length; j += 1) {
+
+                            self.logger.info(self.core.getAttribute(self.pathToNode[evalNode[j]], 'name'));
+                            self.logger.info(self.core.getAttribute(self.pathToNode[evalNode[j]], 'codeEditor'));
+                            var _func = self.core.getAttribute(self.pathToNode[evalNode[j]], 'codeEditor');
+                            editors_viz[viz_items] = _func;
                             // self.logger.error('Arrayitem', items);
                             eval_items++;
                         }
@@ -418,7 +432,7 @@ define([
 
         // Invoke the next step here however you like
         // console.log(headercontent);   // Put all of the code here (not the best solution)
-        fs.writeFileSync("src/plugins/codeGenerator/abc.ipynb", headercontent);
+        fs.writeFileSync("src/plugins/codeGenerator/abckeras.ipynb", headercontent);
         // fs.writeFile("src/plugins/codeGenerator/abc.ipynb", headercontent, function (err) {
         //     if (err) {
         //         return console.log(err);
@@ -440,7 +454,7 @@ define([
 
         // Invoke the next step here however you like
         // console.log(templatecontent);   // Put all of the code here (not the best solution)
-        fs.appendFileSync("src/plugins/codeGenerator/abc.ipynb", templatecontent);
+        fs.appendFileSync("src/plugins/codeGenerator/abckeras.ipynb", templatecontent);
         // fs.appendFile("src/plugins/codeGenerator/abc.ipynb", templatecontent, function (err) {
         //     if (err) {
         //         return console.log(err);
@@ -460,7 +474,7 @@ define([
 
         // Invoke the next step here however you like
         // console.log(footercontent);   // Put all of the code here (not the best solution)
-        fs.appendFileSync("src/plugins/codeGenerator/abc.ipynb", footercontent);
+        fs.appendFileSync("src/plugins/codeGenerator/abckeras.ipynb", footercontent);
         // fs.appendFile("./src/plugins/codeGenerator/abc.ipynb", footercontent, function (err) {
         //     if (err) {
         //         return console.log(err);
@@ -471,12 +485,12 @@ define([
         //});
         var replace = require("replace");
         console.log("- 1");
-        fs.exists('./src/plugins/codeGenerator/abc.ipynb', function (exists) {
+        fs.exists('./src/plugins/codeGenerator/abckeras.ipynb', function (exists) {
             if (exists) {
                 replace({
                     regex: "undefined",
                     replacement: " ",
-                    paths: ['./src/plugins/codeGenerator/abc.ipynb'],
+                    paths: ['./src/plugins/codeGenerator/abckeras.ipynb'],
                     recursive: true,
                     silent: true,
                 });
@@ -531,7 +545,7 @@ define([
                         }
                         console.log("- 4");
                         // upload file
-                        var readStream = fs.createReadStream("./src/plugins/codeGenerator/abc.ipynb");
+                        var readStream = fs.createReadStream("./src/plugins/codeGenerator/abckeras.ipynb");
                         var writeStream = sftp.createWriteStream("/home/ubuntu/dataAnalytics/webGME_iPython.ipynb");
 
                         // what to do when transfer finishes
@@ -568,7 +582,7 @@ define([
 
         conn.connect(
             {
-                "host": "129.59.107.172",
+                "host": "129.59.107.143",
                 "port": 22,
                 "username": "ubuntu",
                 "privateKey": fs.readFileSync('/root/.ssh/id_rsa')
@@ -577,6 +591,6 @@ define([
     };
 
 
-    return codeGenerator;
+    return nngenerator;
 })
 ;
